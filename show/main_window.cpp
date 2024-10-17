@@ -1,6 +1,5 @@
 #include "main_window.h"
-// #include "./ui_mainwindow.h"
-//ui_mainwindow.h对应qtcreator中的mainwindow.ui图形化创建的窗口
+#include <QString>
 
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
@@ -15,38 +14,12 @@ MainWindow::MainWindow(QWidget *parent):
     collectThread(new QThread()),
     dataCollector(new DataCollector()),
     customplot(new QCustomPlot()),
-    customplot2(new QCustomPlot())
+    customplot2(new QCustomPlot()),
+    messageDischarge(new QLabel()),
+    messageArea(new QScrollArea()),
+    falsecount(0)
 {
     this->setCentralWidget(wid);
-
-    // QValueAxis *axisX1 = new QValueAxis();
-    // axisX1->setRange(0, 10000); // 设置 X 轴的范围
-    // QValueAxis *axisY1 = new QValueAxis();
-    // axisY1->setRange(-RANGE_VOLTAGE, RANGE_VOLTAGE); // 设置 Y 轴的范围
-    // QValueAxis *axisX2 = new QValueAxis();
-    // axisX2->setRange(0, 10000); // 设置 X 轴的范围
-    // QValueAxis *axisY2 = new QValueAxis();
-    // axisY2->setRange(-RANGE_VOLTAGE, RANGE_VOLTAGE); // 设置 Y 轴的范围
-
-    // oriChart->addSeries(oriSeries);
-    // oriChart->addAxis(axisX1, Qt::AlignBottom);
-    // oriChart->addAxis(axisY1, Qt::AlignLeft);
-    // oriSeries->attachAxis(axisX1);
-    // oriSeries->attachAxis(axisY1);
-    // oriChart->setTitle("Origin Data");
-    // oriChart->setAnimationOptions(QChart::SeriesAnimations);
-    // oriChartView->setRenderHint(QPainter::Antialiasing);
-    // vlayout->addWidget(oriChartView);
-
-    // dwtChart->addSeries(dwtSeries);
-    // dwtChart->addAxis(axisX2, Qt::AlignBottom);
-    // dwtChart->addAxis(axisY2, Qt::AlignLeft);
-    // dwtSeries->attachAxis(axisX2);
-    // dwtSeries->attachAxis(axisY2);
-    // dwtChart->setTitle("Dwt Output");
-    // dwtChart->setAnimationOptions(QChart::SeriesAnimations);
-    // dwtChartView->setRenderHint(QPainter::Antialiasing);
-    // vlayout->addWidget(dwtChartView);
 
     customplot->addGraph();
     customplot->setMinimumSize(1200, 300);
@@ -59,6 +32,20 @@ MainWindow::MainWindow(QWidget *parent):
     customplot2->xAxis->setRange(0, 10000);
     customplot2->yAxis->setRange(-RANGE_VOLTAGE, RANGE_VOLTAGE);
     vlayout->addWidget(customplot2);
+
+    QFont *font = new QFont();
+    font->setBold(true);
+    font->setPointSize(25);
+    font->setFamily("Times New Roman");
+    messageArea->setWidget(messageDischarge);
+    messageArea->setWidgetResizable(true);
+    messageArea->setFixedHeight(100);
+    messageArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    messageArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    messageDischarge->setAlignment(Qt::AlignCenter);
+    messageDischarge->setFont(*font);
+    messageDischarge->setStyleSheet("QLabel{Color: red;}");
+    vlayout->addWidget(messageArea);
 
     wid->setLayout(vlayout);
 
@@ -75,43 +62,9 @@ MainWindow::MainWindow(QWidget *parent):
     collectThread->start();
 }
 
-// void MainWindow::setData(double oriData[10000], coder::array<double, 1U> &result)
-// {
-//     // update origin data
-//     oriSeries->clear();
-//     int count = oriSeries->points().size();
-//     for(int i=0;i<10000;i++){
-//         oriSeries->append(i, oriData[i]);
-//         // count++;
-//         // if(count>10000){
-//         //     oriSeries->remove(0);
-//         //     count--;
-//         // }
-//         QApplication::processEvents();
-//     }
 
-//     // update dwt result
-//     dwtSeries->clear();
-//     count = dwtSeries->points().size();
-//     for(int i=0;i<10000;i++){
-//         dwtSeries->append(i, result[i]);
-//         // count++;
-//         // if(count>10000){
-//         //     dwtSeries->remove(0);
-//         //     count--;
-//         // }
-//         QApplication::processEvents();
-//     }
-// }
 
 void MainWindow::updateOriData(QVector<qreal> x, QVector<qreal> y){
-    // oriSeries->append(x, y);
-    // // printf("size of oriSeries:%d\n", oriSeries->points().size());
-    // if(oriSeries->points().size() > 10000){
-    //     oriSeries->remove(0);
-    // }
-    // if(customplot->graph(0)->dataCount() >= 10000) customplot->graph(0)->data()->remove(0);
-    // customplot->graph(0)->data()->clear();
     customplot->graph(0)->setData(x, y);
     // customplot->graph(0)->addData(x, y);
     // if(customplot->graph(0)->dataCount() % 100 == 0) 
@@ -119,17 +72,17 @@ void MainWindow::updateOriData(QVector<qreal> x, QVector<qreal> y){
 }
 
 void MainWindow::updateDwtData(bool judge, QVector<qreal> x, QVector<qreal> y){
-    // QCPLayoutGrid *layout = customplot->plotLayout();
-    // QCPTextElement *title = new QCPTextElement(customplot, "My Title");
-    // layout->addElement(title);
-    // dwtSeries->append(x, y);
-    // if(dwtSeries->points().size() > 10000){
-    //     dwtSeries->remove(0);
-    // }
-    // if(customplot2->graph(0)->dataCount() >= 10000) customplot2->graph(0)->data()->remove(0);
-    // customplot2->graph(0)->data()->clear();
-    if(judge) printf("true\n");
-    else printf("false\n");
+    if(judge){
+        falsecount++;
+        messageDischarge->setText("true");
+        printf("%s\n", "true");
+        messageArea->setBackgroundRole(QPalette::Dark);
+    }
+    else{
+        QString countStr = QString::number(falsecount);
+        messageDischarge->setText("false total incorrect:" + countStr);
+        messageArea->setBackgroundRole(QPalette::NoRole);
+    }
     customplot2->graph(0)->setData(x, y);
     // if(customplot2->graph(0)->dataCount()%100==0) customplot2->replot();
     customplot2->replot();
@@ -140,20 +93,8 @@ void MainWindow::startContinu(){
 }
 
 void MainWindow::startSingle(float *input, float *output){
-    // QVector<qreal> Qinput, Qoutput;
-    // for(int i{0};i<10000;i++){
-        // if(input[i] > 1) printf("unusal data:%lf\n", input[i]);
-        // Qinput.append(static_cast<qreal>(input[i]));
-        // Qoutput.append(static_cast<qreal>(output[i]));
-    // }
-    // printf("data9999:%f", input[9999]);
     emit startSingleData(input, output);
 }
-
-// void MainWindow::clearSeries(){
-//     oriSeries->clear();
-//     dwtSeries->clear();
-// }
 
 MainWindow::~MainWindow()
 {

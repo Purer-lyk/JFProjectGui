@@ -39,12 +39,15 @@ public slots:
     void singleData(float *input, float *output);
 
 private:
+    int falseCount;
     bool m_collecting;
     DwtClass *dwtInstance;
     DwtWorker *dwtWorker;
 
     void voltageInit(short buffer[2*10000], float oriData[10000]);
     void sampleData(float oriData[10000]);
+    float myFilter(float input);
+    void writeFalseAlert(QVector<qreal> input, QVector<qreal> output);
 };
 
 #endif // COLLECT_DATA_H

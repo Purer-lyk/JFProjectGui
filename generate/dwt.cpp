@@ -4,11 +4,37 @@
 #include "coder_array.h"
 #include "rt_nonfinite.h"
 #include <cmath>
+#include <fstream>
+#include <string>
 
 DwtClass *instancePtr = new DwtClass();
 
 DwtWorker::DwtWorker(){
-    
+    globalThresh = 0.5;
+    interval = 3500;
+    minDischarge=1;
+    maxDischarge=5;
+    std::string paramFile = "./param.txt";
+    std::ifstream srcFile(paramFile, std::ios::in);
+    std::string s, paramName, paramStr;
+    while(std::getline(srcFile, s)){
+        // printf("str:%s\n", s);
+        for(int i=0;i<s.size()-1;i++){
+            if(s[i]==' ' && s[i+1]!=' '){
+                paramName = s.substr(0, i);
+                paramStr = s.substr(i+1, s.size()-i-1);
+                if(paramName == "globalThresh") globalThresh = std::stof(paramStr);
+                else if(paramName == "interval") interval = std::stoi(paramStr);
+                else if(paramName == "minDischarge") minDischarge = std::stoi(paramStr);
+                else if(paramName == "maxDischarge") maxDischarge = std::stoi(paramStr);
+                break;
+            }
+        }
+    }
+    printf("globalThresh:%f\n", globalThresh);
+    printf("interval:%d\n", interval);
+    printf("minDischarge:%d\n", minDischarge);
+    printf("maxDischarge:%d\n", maxDischarge);
 }
 
 DwtWorker::~DwtWorker(){
@@ -36,12 +62,12 @@ bool DwtWorker::judgeDischarge(float output[10000]){
         absOutput[i] = abs(output[i]);
         if(absOutput[i] > globalMaxItem) globalMaxItem = absOutput[i];
     }
-    if(globalMaxItem < 0.2) return false;
-    int count=0, quit=0, bandwidth=0;
+    if(globalMaxItem < globalThresh) return false;
+    int count=0, realcount = 0, quit=0, bandwidth=0, lasti = -interval;
     float maxItem=0;
     for(int i=0;i<10000;i++){
         if(maxItem != 0){
-            if(absOutput[i]<=0.1) quit++;
+            if(absOutput[i]<=maxItem/3.0f) quit++;
             else{
                 quit=0;
                 bandwidth++;
@@ -49,6 +75,8 @@ bool DwtWorker::judgeDischarge(float output[10000]){
             if(quit>50){
                 if(bandwidth>10){
                     count++;
+                    if(i - lasti > interval) realcount++;
+                    lasti=i;
                     // printf("discharge position:%d\n",i);
                 }
                 maxItem=0;
@@ -56,9 +84,9 @@ bool DwtWorker::judgeDischarge(float output[10000]){
             }
             continue;
         }
-        if(absOutput[i] > globalMaxItem*0.6) maxItem = absOutput[i];
+        if(absOutput[i] > globalThresh) maxItem = absOutput[i];
     }
     printf("Discharge count:%d\n", count);
-    if(count > 0 && count < 5) return true;
+    if(count > minDischarge && count < maxDischarge && realcount > minDischarge && realcount < maxDischarge) return true;
     else return false;
 }

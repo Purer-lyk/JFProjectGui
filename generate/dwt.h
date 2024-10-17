@@ -10,7 +10,10 @@ public:
     void dwt(float input[10000], float output[10000]);
 
     bool judgeDischarge(float output[10000]);
-    
+
+private:
+    float globalThresh;
+    int interval, minDischarge, maxDischarge;
 };
 
 #endif

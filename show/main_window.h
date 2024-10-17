@@ -51,6 +51,9 @@ private:
     QThread *collectThread;
     DataCollector *dataCollector;
     QCustomPlot *customplot, *customplot2;
+    QLabel *messageDischarge;
+    QScrollArea *messageArea;
+    int falsecount;
 };
 
 #endif //MAIN_WINDOW_H

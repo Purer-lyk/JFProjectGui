@@ -2,7 +2,7 @@
 ## Makefile generated for component 'dwtProcess'. 
 ## 
 ## Makefile     : dwtProcess_rtw.mk
-## Generated on : Mon Oct 14 10:58:57 2024
+## Generated on : Tue Oct 15 15:57:43 2024
 ## Final product: .\dwtProcess.lib
 ## Product type : static-library
 ## 
@@ -24,7 +24,7 @@ MAKEFILE                  = dwtProcess_rtw.mk
 MATLAB_ROOT               = E:\matlab_use
 MATLAB_BIN                = E:\matlab_use\bin
 MATLAB_ARCH_BIN           = $(MATLAB_BIN)\win64
-START_DIR                 = E:\matlab_project\generate
+START_DIR                 = E:\matlab_project\alert\codegen\lib\dwtProcess
 TGT_FCN_LIB               = ISO_C++11
 SOLVER_OBJ                = 
 CLASSIC_INTERFACE         = 0
